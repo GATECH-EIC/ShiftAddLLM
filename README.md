@@ -22,7 +22,7 @@
   [Xiaofan Zhang](https://www.xiaofanzhang.net/), <br>
   [Souvik Kundu](https://ksouvik52.github.io/), 
   [Amir Yazdanbakhsh](https://www.ayazdan.com/), 
-  [Yingyan Lin](https://eiclab.scs.gatech.edu/pages/team.html)
+  [Yingyan (Celine) Lin](https://eiclab.scs.gatech.edu/pages/team.html)
   <br>Georgia Institute of Technology, Intel Labs, Google, Google DeepMind<br>
 
 </div>
