@@ -15,17 +15,17 @@
 
 </div>
 
-> [**ShiftAddLLM: Accelerating Pretrained LLMs via Post-Training Multiplication-Less Reparameterization**](https://arxiv.org/abs/2406.05981)<br>
-> [Haoran You](https://www.haoranyou.com/), 
-> [Yipin Guo](https://openreview.net/profile?id=~Yipin_Guo1), 
-> [Yichao Fu](https://github.com/Viol2000),
-> [Wei Zhou](https://www.linkedin.com/in/wei-zhou3/),
-> [Huihong Shi](https://scholar.google.com/citations?user=j7AChUYAAAAJ&hl),
-> [Xiaofan Zhang](https://www.xiaofanzhang.net/), 
-> [Souvik Kundu](https://ksouvik52.github.io/), 
-> [Amir Yazdanbakhsh](https://www.ayazdan.com/), 
-> [Yingyan Lin](https://eiclab.scs.gatech.edu/pages/team.html)
-> <br>Georgia Institute of Technology, Intel Labs, Google, Google DeepMind<br>
+[**ShiftAddLLM: Accelerating Pretrained LLMs via Post-Training Multiplication-Less Reparameterization**](https://arxiv.org/abs/2406.05981)<br>
+[Haoran You](https://www.haoranyou.com/), 
+[Yipin Guo](https://openreview.net/profile?id=~Yipin_Guo1), 
+[Yichao Fu](https://github.com/Viol2000),
+[Wei Zhou](https://www.linkedin.com/in/wei-zhou3/),
+[Huihong Shi](https://scholar.google.com/citations?user=j7AChUYAAAAJ&hl),
+[Xiaofan Zhang](https://www.xiaofanzhang.net/), 
+[Souvik Kundu](https://ksouvik52.github.io/), 
+[Amir Yazdanbakhsh](https://www.ayazdan.com/), 
+[Yingyan Lin](https://eiclab.scs.gatech.edu/pages/team.html)
+<br>Georgia Institute of Technology, Intel Labs, Google, Google DeepMind<br>
 
 
 ---
