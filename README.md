@@ -108,7 +108,7 @@ To evaluate quantized LLMs on seven downstream tasks for zero-shot task accuracy
 ```
 python3 main.py  <model_name> <calibration_dataset> --task <task_name> --num_fewshot <num_fewshot> 
 ```
- We also provide example scripts for two LLMs family.
+ We also provide example scripts for two LLM families.
 - [OPT](zeroShot/script/eval_opt.sh)
 - [Llama2 & Llama3](zeroShot/script/eval_llama.sh)
 
@@ -123,3 +123,5 @@ python3 main.py  <model_name> <calibration_dataset> --task <task_name> --num_few
   year={2024}
 }
 ````
+
+Thanks to [OPTQ](https://openreview.net/forum?id=tcbBPnfwxS), [LUT-GEMM](https://arxiv.org/abs/2206.09557), and [DeepShift](https://arxiv.org/abs/2208.09708) for their wonderful work and codebase!
