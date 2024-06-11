@@ -31,7 +31,7 @@
 
 ## News 🔥🔥 !
 - [ To Do ] Release model checkpoints.
-- [ ✅ New ] Jun. 10, 2024. 💥 [ShiftAddLLM](https://arxiv.org/abs/2406.05981)'s PyTorch implementation code are released !
+- [ ✅ New ] Jun. 10, 2024. 💥 [ShiftAddLLM](https://arxiv.org/abs/2406.05981)'s PyTorch implementation codes are released!
 
 
 ## Table of Content
