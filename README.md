@@ -40,7 +40,7 @@
 
 [Basic Usage](#basic-usage)
 * [Environment Setup](#environment-setup)
-* [Core Training Options](#core-training-options)
+* [Core Optimization Options](#core-optimization-options)
 
 [Reproduce ShiftAddLLM](#reproduce-shiftaddllm)
 * [ShiftAddLLM (Acc.)](#shiftaddllm-acc)
@@ -71,7 +71,7 @@ conda activate shiftaddllm
 export PYTHONPATH='YOUR-PATH-TO-SHIFTADDLLM-REPO'
 ```
 
-### Core Training Options
+### Core Optimization Options
 - `model`: huggingface path of the model to quantize.
 - `dataset`: which dataset you want to use as calibration data.
 - `wbits`: number of bits to use for quantization; use 16 for evaluating base model.
