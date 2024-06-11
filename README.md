@@ -19,7 +19,7 @@
   [Yichao Fu](https://github.com/Viol2000),
   [Wei Zhou](https://www.linkedin.com/in/wei-zhou3/),
   [Huihong Shi](https://scholar.google.com/citations?user=j7AChUYAAAAJ&hl),
-  [Xiaofan Zhang](https://www.xiaofanzhang.net/), 
+  [Xiaofan Zhang](https://www.xiaofanzhang.net/), <br>
   [Souvik Kundu](https://ksouvik52.github.io/), 
   [Amir Yazdanbakhsh](https://www.ayazdan.com/), 
   [Yingyan Lin](https://eiclab.scs.gatech.edu/pages/team.html)
