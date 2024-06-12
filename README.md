@@ -104,8 +104,10 @@ To quantize LLMs using our ShiftAddLLM (Lat.) method with block-wise scaling fac
 - [Gemma](script/lat/eval_gemma.sh)
 
 ### Zero-Shot Downstream Task Evaluation
+
 To evaluate quantized LLMs on seven downstream tasks for zero-shot task accuracy evaluation, run:
-```
+
+```python
 python3 main.py  <model_name> <calibration_dataset> --task <task_name> --num_fewshot <num_fewshot> 
 ```
  We also provide example scripts for two LLM families.
@@ -115,7 +117,7 @@ python3 main.py  <model_name> <calibration_dataset> --task <task_name> --num_few
 
 ## Citation & Acknowledgement
 
-````
+````bibtex
 @article{you2024shiftaddllm,
   title={ShiftAddLLM: Accelerating Pretrained LLMs via Post-Training Multiplication-Less Reparameterization},
   author={You, Haoran and Guo, Yipin and Fu, Yichao and Zhou, Wei and Shi, Huihong and Zhang, Xiaofan and Kundu, Souvik and Yazdanbakhsh, Amir and Lin, Yingyan},
