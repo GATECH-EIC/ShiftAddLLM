@@ -127,3 +127,7 @@ python3 main.py  <model_name> <calibration_dataset> --task <task_name> --num_few
 ````
 
 Thanks to [OPTQ](https://openreview.net/forum?id=tcbBPnfwxS), [LUT-GEMM](https://arxiv.org/abs/2206.09557), and [DeepShift](https://arxiv.org/abs/2208.09708) for their wonderful work and codebase!
+
+Disclaimer:
+
+This “research quality code” is for Non-Commercial purposes and provided by the contributors “As Is” without any express or implied warranty of any kind. The organizations (Georgia Tech or Intel or  Google or Google DeepMind) involved do not own the rights to the data sets used and do not confer any rights to it. The organizations (Georgia Tech or Intel or  Google or Google DeepMind) do not warrant or assume responsibility for the accuracy or completeness of any information, text, graphics, links or other items within the code. A thorough security review has not been performed on this code. Additionally, this repository may contain components that are out of date or contain known security vulnerabilities.
