@@ -9,6 +9,6 @@ CUDA_VISIBLE_DEVICES=0 python model/opt.py \
     facebook/opt-125m \
     --wbits 3 \
     --groupsize -1 \
-		--lat \
+    --lat \
     --bcq_round 50 \
     --quant_config sensitivity/mixbit/opt-125m.json
