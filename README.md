@@ -94,7 +94,7 @@ You can download our quantized ShiftAddLLM model checkpoints from our [Huggingfa
 
 #### Evaluate ShiftAddLLM (Acc.)
 
-The weights quantized in ShiftAddLLM (Acc.) mode are stored in an FP16 precision and are formatted to comply with the official Huggingface interface.
+The weights in ShiftAddLLM (Acc.) mode are stored in an FP16 precision and are formatted to comply with the official Huggingface interface.
 
 To use these weights, you can directly call the Huggingface API (note: the weight size here is the same as the original weight, aiming to verify the accuracy after reparameterization).
 
@@ -115,7 +115,7 @@ CUDA_VISIBLE_DEVICES=0 python model/llama.py \
 
 #### Evaluate ShiftAddLLM (Lat.)
 
-The weights quantized in ShiftAddLLM (Lat.) mode are packed and stored in an Int32 format. This significantly reduces the storage space required compared to the original weights. However, the weights for Latency mode need to be loaded using the method specified in our code.
+The weights quantized in ShiftAddLLM (Lat.) mode are packed and stored in an Int32 format. This significantly reduces the required storage compared to the original weights. However, the weights for Latency mode need to be loaded using the method specified in our code.
 
 To use these weights, you need first to download the model weights repository locally. For example:
 
