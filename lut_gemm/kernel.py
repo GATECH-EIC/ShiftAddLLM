@@ -55,8 +55,27 @@ def unpack_weight(bW:torch.Tensor, alpha:torch.Tensor):
     ret_weight = ret_weight.transpose(0, 1)
     return ret_weight
 
-def load_shiftaddllm_weight(model, weights_dir, model_name, wbits, groupsize=-1, quant_type="blockwise"):
-    print(f"Loading shiftaddllm low-bit weights from {weights_dir}, model_name: {model_name}, wbits: {wbits}, groupsize: {groupsize}, quant_type: {quant_type}")
+def packed_to_fake_binaryWeight(packed_bweight, n_groups=1):
+
+    def binary(x, bits):
+        mask = 2**torch.arange(bits).to(x.device, x.dtype)
+        return x.unsqueeze(-1).bitwise_and(mask).ne(0).byte()
+
+    wbit = packed_bweight.size(-1)
+    packed_bweight = packed_bweight.permute(1, 2, 0).contiguous()
+    weight_list = []
+    for i in range(wbit):
+        binaryWeight_perBit = binary(packed_bweight[:,i,:], 32) * 2 - 1
+        binaryWeight_perBit = binaryWeight_perBit.transpose(0, 1).flatten(1).unsqueeze(-1)
+        weight_list.append(binaryWeight_perBit)
+    weight = torch.cat(weight_list, dim=-1)
+    K,N,bit = weight.size()
+    groupsize = N // n_groups
+    weight = weight.view(K, n_groups, groupsize, bit)
+    return weight
+
+def load_shiftaddllm_weight(model, weights_dir, model_name, wbits, is_lat=False):
+    print(f"Loading shiftaddllm low-bit weights from {weights_dir}, model_name: {model_name}, wbits: {wbits}")
     def find_layers(module, layers=[nn.Conv2d, nn.Linear], name=''):
         if type(module) in layers:
             return {name: module}
@@ -67,26 +86,24 @@ def load_shiftaddllm_weight(model, weights_dir, model_name, wbits, groupsize=-1,
             ))
         return res
 
-    assert quant_type in ["blockwise", "columnwise","lut"], "Quantization type should be ['blockwise', 'columnwise','lut'], but got {}".format(quant_type)
-    layers = model.model.layers
-    if "/" in model_name:
-        model_name = model_name.split('/')[-1]
+    assert is_lat, "Packed quantization weight only support lat method now"
+    layers = model.model.decoder.layers
     for i in tqdm(range(len(layers)), desc="Loading shiftaddllm low-bit weights", leave=False):
         layer = layers[i]
         subset = find_layers(layer)
         for name in subset:
             layer_name = f"{i}.{name}"
-            temp_storage_pt = os.path.join(weights_dir, f"{layer_name}_{wbits}bit_{groupsize}groupsize.pt")
+            temp_storage_pt = os.path.join(weights_dir, f"{model_name}_{layer_name}_{wbits}bit.pt")
 
             if os.path.exists(temp_storage_pt):
                 # print(f"load from {temp_storage_pt}")
                 checkpoint = torch.load(temp_storage_pt)
                 BinaryWeight = checkpoint["bWeight"]
                 alpha = checkpoint["alpha"]
+                alpha = alpha.repeat_interleave(8, dim=0)
                 W = unpack_weight(BinaryWeight, alpha)
-                if quant_type == "blockwise":
-                    W = W.transpose(0, 1).contiguous()
-                subset[name].weight.data = W
+                W = W.transpose(0, 1).contiguous()
+                subset[name].weight.data = W.to(subset[name].weight.data.dtype)
             else:
                 print(f"WARNING: no such file {temp_storage_pt}")
 

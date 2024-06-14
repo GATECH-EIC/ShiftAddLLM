@@ -58,7 +58,7 @@ def parse_args():
         help='For OPT model to load; pass `facebook/opt-X`.\\ BLOOM model to load; pass `bigscience/bloom-X`'
     )
     parser.add_argument(
-        'dataset', type=str, choices=['wikitext2', 'ptb', 'c4'],
+        '--dataset', type=str, default="wikitext2", choices=['wikitext2', 'ptb', 'c4'],
         help='Where to extract calibration data from.'
     )
     parser.add_argument(
@@ -81,12 +81,16 @@ def parse_args():
         '--table_results', action="store_true", help='Print results in a table.'
     )
 
-    parser.add_argument("--tasks", default=None, choices=MultiChoice(tasks.ALL_TASKS))
     parser.add_argument("--num_fewshot", type=int, default=0)
     parser.add_argument("--output_path", default=None)
     parser.add_argument("--wbits", type=int, default=32)
     parser.add_argument("--nearest", action="store_true")
+    
     parser.add_argument('--load', type=str, default='')
+    parser.add_argument(
+        '--load_shiftaddllm', type=str, default=None,
+        help='load from temporary quantized weight with low bit under this dir.'
+    )
 
     args = parser.parse_args()
     args.batch_size = 1  # BS=1 is used for zeroShot tasks!

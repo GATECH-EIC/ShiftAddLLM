@@ -439,13 +439,13 @@ if __name__ == '__main__':
     if args.load_temp_storage is not None:
         assert args.block_quant, "temp_storage only work for blockwise (i.e lat. method) quantization"
         load_shiftaddllm_weight(model, args.load_temp_storage, model_name=str(args.model).split("/")[-1],
-                                wbits=args.wbits, groupsize=args.groupsize)
+                                wbits=args.wbits, is_lat=args.lat)
 
     dataloader, testloader = get_loaders(
         args.dataset, nsamples=args.nsamples, seed=args.seed, model=args.model, seqlen=model.seqlen
     )
     
-    if args.wbits < 16 and not args.nearest:
+    if args.wbits < 16 and not args.nearest and args.load_temp_storage is None:
         tick = time.time()
         if args.bcq:
             print("quantizing with bcq")
@@ -465,13 +465,13 @@ if __name__ == '__main__':
         print(input_ids.shape)
         benchmark(model, input_ids, check=args.check)
             
-    if args.load or args.benchmark:
+    if args.benchmark:
         exit()
 
     if args.save:
         torch.save(model.state_dict(), args.save)
         
-    datasets = ['wikitext2', 'ptb', "c4"] 
+    datasets = ['wikitext2', 'ptb'] 
     if args.new_eval:
         datasets = ['wikitext2', 'ptb-new', 'c4-new']
     for dataset in datasets:

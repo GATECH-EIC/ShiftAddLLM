@@ -67,12 +67,10 @@ class ShiftAddLLM(QuantMethod):
 			self, args, model_name, layer_name
 	):  
 		temp_storage_pt = ""
-		parent_dir = ""
 		if args.temp_storage is not None:
 			assert args.block_quant, "temp_storage only work for blockwise (i.e lat. method) quantization"
-			parent_dir = os.path.join(args.temp_storage, f"{model_name}")
-			os.makedirs(parent_dir, exist_ok=True)
-			temp_storage_pt = os.path.join(parent_dir, f"{layer_name}_{self.quantizer.wbits}bit_{args.groupsize}groupsize.pt")
+			os.makedirs(args.temp_storage, exist_ok=True)
+			temp_storage_pt = os.path.join(args.temp_storage, f"{model_name}_{layer_name}_{self.quantizer.wbits}bit.pt")
 
 		if os.path.exists(temp_storage_pt):
 			print(f"load from {temp_storage_pt}")

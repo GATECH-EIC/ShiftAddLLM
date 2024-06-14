@@ -138,7 +138,6 @@ class OPTClass(BaseLM):
         attention_masks = cache['attention_masks']
 
         for i in range(len(layers)):
-            print(i)
             layer = layers[i].to(dev)
 
             if self.args.nearest:

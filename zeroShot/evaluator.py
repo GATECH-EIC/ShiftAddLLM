@@ -4,6 +4,7 @@ import random
 import numpy as np
 import models
 import models.models_utils
+from models.kernel import load_shiftaddllm_weight
 import tasks
 import collections
 import itertools
@@ -41,7 +42,11 @@ def simple_evaluate(
         print('Loading checkpoint from {}...'.format(args.load))
         lm.model.load_state_dict(torch.load(args.load))
 
-    if args.wbits < 16 and not args.nearest:
+    elif args.load_shiftaddllm is not None:
+        load_shiftaddllm_weight(lm.model, args.load_shiftaddllm, model_name=str(args.model).split("/")[-1],
+                                wbits=args.wbits, groupsize=args.groupsize, quant_type="blockwise")
+
+    elif args.wbits < 16 and not args.nearest:
 
         tick = time.time()
         dataloader, testloader = get_loaders(

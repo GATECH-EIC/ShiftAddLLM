@@ -1,18 +1,13 @@
 import json
-import logging
 
 import evaluator
-import tasks
-from utils import parse_args, pattern_match
+from utils import parse_args
 
 
-def main():
+def main(taskname):
     args = parse_args()
 
-    if args.tasks is None:
-        raise ValueError("Please specify a task to run")
-    else:
-        task_names = pattern_match(args.tasks.split(","), tasks.ALL_TASKS)
+    task_names = [taskname]
 
     print(f"Selected Tasks: {task_names}")
 
@@ -41,4 +36,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    task_names = ["arc_challenge", "arc_easy", "copa", "boolq", "piqa", "storycloze", "rte"]
+    for each in task_names:
+        main(each)

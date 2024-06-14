@@ -314,3 +314,96 @@ mSize, kSize, nb,  num_groups, d_input_ptr, 0);
  // );
 //clock_t end = clock();
 }
+
+
+void lutgemm_block_cuda(
+  torch::Tensor output,
+  torch::Tensor bWeight,
+  torch::Tensor alpha,
+  torch::Tensor d_input,
+  int mSize, int kSize, int nb,  int num_groups
+) {
+
+      __half * d_input_ptr = (__half*)d_input.data<at::Half>();
+     __half * output_ptr = (__half*)output.data<at::Half>();
+      uint32_t*bWeight_ptr = (uint32_t*)bWeight.data<int32_t>();
+       __half* alpha_ptr = (__half*)alpha.data<at::Half>();
+       int batch = d_input.size(0), in_size = d_input.size(-1), out_size = output.size(-1);
+//       __half*q_bias_ptr = (__half*)q_bias.data<at::Half>();
+//output, uint32_t*bWeight, __half* alpha,__half*q_bias, 
+//int mSize, int kSize, int nb,  int num_groups, __half *input, int algo
+    nqmv_bias_block(output_ptr, bWeight_ptr, alpha_ptr, 
+mSize, kSize, nb,  num_groups, d_input_ptr, 0, batch, in_size, out_size);
+
+
+          //        cudaDeviceSynchronize();
+        //    tm.end();
+        //}
+
+       // printf("latencyx min : %.5fms, max : %.5fms, avg:%.5f\n", tm.min(), tm.max(), tm.mean());
+    //})
+ // );
+//clock_t end = clock();
+}
+
+
+void lutgemm_block_shift_cuda(
+  torch::Tensor output,
+  torch::Tensor bWeight,
+  torch::Tensor alpha,
+  torch::Tensor d_input,
+  int mSize, int kSize, int nb,  int num_groups, int num_apot
+) {
+
+      __half * d_input_ptr = (__half*)d_input.data<at::Half>();
+     __half * output_ptr = (__half*)output.data<at::Half>();
+      uint32_t*bWeight_ptr = (uint32_t*)bWeight.data<int32_t>();
+       uint16_t* alpha_ptr = (uint16_t*)alpha.data<int16_t>();
+       int batch = d_input.size(0), in_size = d_input.size(-1), out_size = output.size(-1);
+//       __half*q_bias_ptr = (__half*)q_bias.data<at::Half>();
+//output, uint32_t*bWeight, __half* alpha,__half*q_bias, 
+//int mSize, int kSize, int nb,  int num_groups, __half *input, int algo
+    nqmv_bias_block_shift(output_ptr, bWeight_ptr, alpha_ptr, 
+mSize, kSize, nb,  num_groups,num_apot, d_input_ptr, 0, batch, in_size, out_size);
+
+
+          //        cudaDeviceSynchronize();
+        //    tm.end();
+        //}
+
+       // printf("latencyx min : %.5fms, max : %.5fms, avg:%.5f\n", tm.min(), tm.max(), tm.mean());
+    //})
+ // );
+//clock_t end = clock();
+}
+
+void lutgemm_block_shiftInt8_cuda(
+  torch::Tensor output,
+  torch::Tensor bWeight,
+  torch::Tensor alpha,
+  torch::Tensor d_input,
+  int mSize, int kSize, int nb,  int num_groups, int num_apot
+) {
+
+      __half * d_input_ptr = (__half*)d_input.data<at::Half>();
+     __half * output_ptr = (__half*)output.data<at::Half>();
+      uint32_t*bWeight_ptr = (uint32_t*)bWeight.data<int32_t>();
+       int8_t* alpha_ptr = (int8_t*)alpha.data<int8_t>();
+       int batch = d_input.size(0), in_size = d_input.size(-1), out_size = output.size(-1);
+//       __half*q_bias_ptr = (__half*)q_bias.data<at::Half>();
+//output, uint32_t*bWeight, __half* alpha,__half*q_bias, 
+//int mSize, int kSize, int nb,  int num_groups, __half *input, int algo
+    nqmv_bias_block_shiftInt8(output_ptr, bWeight_ptr, alpha_ptr, 
+mSize, kSize, nb,  num_groups,num_apot, d_input_ptr, 0, batch, in_size, out_size);
+
+
+          //        cudaDeviceSynchronize();
+        //    tm.end();
+        //}
+
+       // printf("latencyx min : %.5fms, max : %.5fms, avg:%.5f\n", tm.min(), tm.max(), tm.mean());
+    //})
+ // );
+//clock_t end = clock();
+}
+

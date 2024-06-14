@@ -20,6 +20,21 @@ void lutgemm_cuda(torch::Tensor output,
   torch::Tensor q_bias,
   torch::Tensor d_input, int mSize, int kSize, int nb,  int num_groups);
 
+void lutgemm_block_cuda(torch::Tensor output,
+  torch::Tensor bWeight,
+  torch::Tensor alpha,
+  torch::Tensor d_input, int mSize, int kSize, int nb,  int num_groups);
+
+void lutgemm_block_shift_cuda(torch::Tensor output,
+  torch::Tensor bWeight,
+  torch::Tensor alpha,
+  torch::Tensor d_input, int mSize, int kSize, int nb,  int num_groups, int num_apot);
+
+void lutgemm_block_shiftInt8_cuda(torch::Tensor output,
+  torch::Tensor bWeight,
+  torch::Tensor alpha,
+  torch::Tensor d_input, int mSize, int kSize, int nb,  int num_groups, int num_apot);
+
 void lutgemm_compute_shift_scale_cuda(torch::Tensor output,
   torch::Tensor bWeight,
   torch::Tensor alpha,
@@ -35,6 +50,40 @@ void lutgemm_compute_shift_scale(
   const at::cuda::OptionalCUDAGuard device_guard(device_of(output));
   lutgemm_compute_shift_scale_cuda(output, bWeight, alpha, d_input, mSize,  kSize,  nb,   num_groups);
 }
+
+void lutgemm_compute_block(
+  torch::Tensor output,
+  torch::Tensor bWeight,
+  torch::Tensor alpha,
+  torch::Tensor d_input,
+  int mSize, int kSize, int nb,  int num_groups
+) {
+  const at::cuda::OptionalCUDAGuard device_guard(device_of(output));
+  lutgemm_block_cuda(output, bWeight, alpha, d_input, mSize,  kSize,  nb,   num_groups);
+}
+
+void lutgemm_compute_block_shift(
+  torch::Tensor output,
+  torch::Tensor bWeight,
+  torch::Tensor alpha,
+  torch::Tensor d_input,
+  int mSize, int kSize, int nb,  int num_groups, int num_apot
+) {
+  const at::cuda::OptionalCUDAGuard device_guard(device_of(output));
+  lutgemm_block_shift_cuda(output, bWeight, alpha, d_input, mSize,  kSize,  nb,   num_groups, num_apot);
+}
+
+void lutgemm_compute_block_shiftInt8(
+  torch::Tensor output,
+  torch::Tensor bWeight,
+  torch::Tensor alpha,
+  torch::Tensor d_input,
+  int mSize, int kSize, int nb,  int num_groups, int num_apot
+) {
+  //const at::cuda::OptionalCUDAGuard device_guard(device_of(output));
+  lutgemm_block_shiftInt8_cuda(output, bWeight, alpha, d_input, mSize,  kSize,  nb,   num_groups, num_apot);
+}
+
 
 void lutgemm_compute(
   torch::Tensor output,
@@ -175,6 +224,9 @@ std::vector<torch::Tensor> parsing(torch::Tensor bW, torch::Tensor A, int row, i
 
 PYBIND11_MODULE(TORCH_EXTENSION_NAME, m) {
   m.def("lutgemm_compute", &lutgemm_compute, "Vector 3-bit Quantized Matrix Multiplication (CUDA)");
+  m.def("lutgemm_compute_block", &lutgemm_compute_block, "Vector 3-bit Quantized Matrix Multiplication (CUDA)");
+  m.def("lutgemm_compute_block_shift", &lutgemm_compute_block_shift, "Vector 3-bit Quantized Matrix Multiplication (CUDA)");
+  m.def("lutgemm_compute_block_shiftInt8", &lutgemm_compute_block_shiftInt8, "Vector 3-bit Quantized Matrix Multiplication (CUDA)");
   m.def("lutgemm_compute_shift_scale", &lutgemm_compute_shift_scale, "pass");
   m.def("makeRandomInput", &makeRandomInput, "Vector 3-bit Quantized Matrix Multiplication (CUDA)");
   m.def("makeRandomAlpha", &makeRandomAlpha, "Vector 3-bit Quantized Matrix Multiplication (CUDA)");
