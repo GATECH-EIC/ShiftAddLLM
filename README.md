@@ -41,6 +41,7 @@
 [Basic Usage](#basic-usage)
 * [Environment Setup](#environment-setup)
 * [Core Optimization Options](#core-optimization-options)
+* [Using Quantized Weights Directly](#use-quantized-weights-directly)
 
 [Reproduce ShiftAddLLM](#reproduce-shiftaddllm)
 * [ShiftAddLLM (Acc.)](#shiftaddllm-acc)
@@ -85,6 +86,43 @@ export PYTHONPATH='YOUR-PATH-TO-SHIFTADDLLM-REPO'
 - `apot_nums`: set nums shift weight for quantization.
 - `acc`: whether to use Ours(acc.) to quantize the model.
 - `lat`: whether to use Ours(lat.) to quantize the model. Only one of `acc` and `lat` should be set.
+
+### Use quantized weights directly
+Visit our [huggingface homepage](https://huggingface.co/ShiftAddLLM) to view available models
+
+#### Acc. model
+
+The weights quantized in Acc. mode are stored in fp16 and converted into a format that complies with the official huggingface interface.
+
+To use it, you can directly call the huggingface API (warning: the weight size here is the same as the original weight, just as a verification of the quantization result)
+
+```python
+# Load model directly
+from transformers import AutoTokenizer, AutoModelForCausalLM
+
+tokenizer = AutoTokenizer.from_pretrained("ShiftAddLLM/Llama-2-70b-wbits2-acc")
+model = AutoModelForCausalLM.from_pretrained("ShiftAddLLM/Llama-2-70b-wbits2-acc")
+```
+
+#### Lat. model
+
+The weights quantized in Lat. mode are stored in int32 and packed. This means they will take up much less space than the original weights. However, the weights for Lat. mode need to be loaded using the method specified in our code.
+
+To use it, you need to first download the model weights repository to local. For example:
+
+```bash
+git clone https://huggingface.co/ShiftAddLLM/opt66b-2bit-lat
+```
+
+Then enter the file address where the model weights are stored into the script. Please keep the model name and wbit corresponding to the weights.
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python model/opt.py \
+    facebook/opt-6.7b \
+    --wbits 2 \
+    --lat \
+    --load_temp_storage <packed_weight_dir>
+```
 
 ## Reproduce ShiftAddLLM
 ### ShiftAddLLM (Acc.)
