@@ -92,9 +92,9 @@ Visit our [huggingface homepage](https://huggingface.co/ShiftAddLLM) to view ava
 
 #### Acc. model
 
-The weights quantized in Acc. mode are stored in fp16 and converted into a format that complies with the official huggingface interface.
+The weights quantized in Acc. mode are stored in fp16 and are formatted to comply with the official Huggingface interface.
 
-To use it, you can directly call the huggingface API (warning: the weight size here is the same as the original weight, just as a verification of the quantization result)
+To use these weights, you can directly call the Huggingface API (note: the weight size here is the same as the original weight, serving as a verification of the quantization result).
 
 ```python
 # Load model directly
@@ -104,17 +104,24 @@ tokenizer = AutoTokenizer.from_pretrained("ShiftAddLLM/Llama-2-70b-wbits2-acc")
 model = AutoModelForCausalLM.from_pretrained("ShiftAddLLM/Llama-2-70b-wbits2-acc")
 ```
 
+To verify this in our code, you can use:
+
+```bash
+CUDA_VISIBLE_DEVICES=0 python model/opt.py \
+    ShiftAddLLM/Llama-2-70b-wbits2-acc \
+```
+
 #### Lat. model
 
-The weights quantized in Lat. mode are stored in int32 and packed. This means they will take up much less space than the original weights. However, the weights for Lat. mode need to be loaded using the method specified in our code.
+The weights quantized in Latency mode are stored in int32 and packed. This significantly reduces the storage space required compared to the original weights. However, the weights for Latency mode need to be loaded using the method specified in our code.
 
-To use it, you need to first download the model weights repository to local. For example:
+To use these weights, you need to first download the model weights repository locally. For example:
 
 ```bash
 git clone https://huggingface.co/ShiftAddLLM/opt66b-2bit-lat
 ```
 
-Then enter the file address where the model weights are stored into the script. Please keep the model name and wbit corresponding to the weights.
+Then, specify the file path where the model weights are stored in the script. Ensure that the model name and wbits correspond to the weights.
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python model/opt.py \
