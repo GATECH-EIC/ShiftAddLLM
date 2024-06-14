@@ -30,7 +30,8 @@
 ---
 
 ## News 🔥🔥 !
-- [ To Do ] Release model checkpoints.
+- [ To Do ] Update the kernel evaluation guideline.
+- [ ✅ New ] Jun. 13, 2024. 🤗 Released our model checkpoints to [Huggingface](https://huggingface.co/ShiftAddLLM)!
 - [ ✅ New ] Jun. 10, 2024. 💥 [ShiftAddLLM](https://arxiv.org/abs/2406.05981)'s PyTorch implementation codes are released!
 
 
@@ -87,14 +88,15 @@ export PYTHONPATH='YOUR-PATH-TO-SHIFTADDLLM-REPO'
 - `acc`: whether to use Ours(acc.) to quantize the model.
 - `lat`: whether to use Ours(lat.) to quantize the model. Only one of `acc` and `lat` should be set.
 
-### Use quantized weights directly
-Visit our [huggingface homepage](https://huggingface.co/ShiftAddLLM) to view available models
+### Use Quantized Weights Directly
 
-#### Acc. model
+You can download our quantized ShiftAddLLM model checkpoints from our [Huggingface homepage](https://huggingface.co/ShiftAddLLM)!
 
-The weights quantized in Acc. mode are stored in fp16 and are formatted to comply with the official Huggingface interface.
+#### Evaluate ShiftAddLLM (Acc.)
 
-To use these weights, you can directly call the Huggingface API (note: the weight size here is the same as the original weight, serving as a verification of the quantization result).
+The weights quantized in ShiftAddLLM (Acc.) mode are stored in an FP16 precision and are formatted to comply with the official Huggingface interface.
+
+To use these weights, you can directly call the Huggingface API (note: the weight size here is the same as the original weight, aiming to verify the accuracy after reparameterization).
 
 ```python
 # Load model directly
@@ -111,17 +113,17 @@ CUDA_VISIBLE_DEVICES=0 python model/llama.py \
     ShiftAddLLM/Llama-2-70b-wbits2-acc
 ```
 
-#### Lat. model
+#### Evaluate ShiftAddLLM (Lat.)
 
-The weights quantized in Latency mode are stored in int32 and packed. This significantly reduces the storage space required compared to the original weights. However, the weights for Latency mode need to be loaded using the method specified in our code.
+The weights quantized in ShiftAddLLM (Lat.) mode are stored in an Int32 format and packed. This significantly reduces the storage space required compared to the original weights. However, the weights for Latency mode need to be loaded using the method specified in our code.
 
-To use these weights, you need to first download the model weights repository locally. For example:
+To use these weights, you need first to download the model weights repository locally. For example:
 
 ```bash
 git clone https://huggingface.co/ShiftAddLLM/opt66b-2bit-lat
 ```
 
-Then, specify the file path where the model weights are stored in the script. Ensure that the model name and wbits correspond to the weights.
+Then, specify the file path where the model weights are stored in the script. Ensure that the model name and wbits are matched with the downloaded weights.
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python model/opt.py \
