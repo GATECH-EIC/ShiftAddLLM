@@ -107,8 +107,8 @@ model = AutoModelForCausalLM.from_pretrained("ShiftAddLLM/Llama-2-70b-wbits2-acc
 To verify this in our code, you can use:
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 python model/opt.py \
-    ShiftAddLLM/Llama-2-70b-wbits2-acc \
+CUDA_VISIBLE_DEVICES=0 python model/llama.py \
+    ShiftAddLLM/Llama-2-70b-wbits2-acc
 ```
 
 #### Lat. model
