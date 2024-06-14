@@ -42,7 +42,7 @@
 [Basic Usage](#basic-usage)
 * [Environment Setup](#environment-setup)
 * [Core Optimization Options](#core-optimization-options)
-* [Using Quantized Weights Directly](#use-quantized-weights-directly)
+* [Using Reparameterized Weights Directly](#use-reparameterized-weights-directly)
 
 [Reproduce ShiftAddLLM](#reproduce-shiftaddllm)
 * [ShiftAddLLM (Acc.)](#shiftaddllm-acc)
@@ -88,9 +88,9 @@ export PYTHONPATH='YOUR-PATH-TO-SHIFTADDLLM-REPO'
 - `acc`: whether to use Ours(acc.) to quantize the model.
 - `lat`: whether to use Ours(lat.) to quantize the model. Only one of `acc` and `lat` should be set.
 
-### Use Quantized Weights Directly
+### Use Reparameterized Weights Directly
 
-You can download our quantized ShiftAddLLM model checkpoints from our [Huggingface homepage](https://huggingface.co/ShiftAddLLM)!
+You can download our reparameterized ShiftAddLLM model checkpoints from our [Huggingface homepage](https://huggingface.co/ShiftAddLLM)!
 
 #### Evaluate ShiftAddLLM (Acc.)
 
@@ -115,7 +115,7 @@ CUDA_VISIBLE_DEVICES=0 python model/llama.py \
 
 #### Evaluate ShiftAddLLM (Lat.)
 
-The weights quantized in ShiftAddLLM (Lat.) mode are packed and stored in an Int32 format. This significantly reduces the required storage compared to the original weights. However, the weights for Latency mode need to be loaded using the method specified in our code.
+The weights in ShiftAddLLM (Lat.) mode are packed and stored in an Int32 format. This significantly reduces the required storage compared to the original weights. However, the weights for Latency mode need to be loaded using the method specified in our code.
 
 To use these weights, you need first to download the model weights repository locally. For example:
 
