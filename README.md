@@ -115,7 +115,7 @@ CUDA_VISIBLE_DEVICES=0 python model/llama.py \
 
 #### Evaluate ShiftAddLLM (Lat.)
 
-The weights quantized in ShiftAddLLM (Lat.) mode are stored in an Int32 format and packed. This significantly reduces the storage space required compared to the original weights. However, the weights for Latency mode need to be loaded using the method specified in our code.
+The weights quantized in ShiftAddLLM (Lat.) mode are packed and stored in an Int32 format. This significantly reduces the storage space required compared to the original weights. However, the weights for Latency mode need to be loaded using the method specified in our code.
 
 To use these weights, you need first to download the model weights repository locally. For example:
 
