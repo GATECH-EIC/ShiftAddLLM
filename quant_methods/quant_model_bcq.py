@@ -2,7 +2,7 @@
 from quantizers.bcq_quant.bcq_parameter import BCQParameter
 
 
-layers = ["q_proj","k_proj","v_proj","out_proj","fc1","fc2"]
+layers = ["q_proj","k_proj","v_proj","out_proj","fc1","fc2","o_proj","gate_proj","up_proj","down_proj"]
 
 def quant_model(model, qbits:int = 4, group_size:int = 128, rounds=50):
     parameters  = model.state_dict()
