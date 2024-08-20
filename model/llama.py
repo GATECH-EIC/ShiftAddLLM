@@ -75,6 +75,13 @@ def llama_sequential(model, dataloader, dev):
     attention_mask = cache['attention_mask']
     position_ids = cache['position_ids']
 
+    quant_config_dict = None
+    if args.quant_config:
+        import json
+        with open(args.quant_config, "r") as f:
+            quant_config_dict = json.load(f)
+        print(f"quant_config: {quant_config_dict}")
+
     print('Ready.')
 
     quantizers = {}
@@ -101,15 +108,20 @@ def llama_sequential(model, dataloader, dev):
             else:
                 quant_method[name] = ShiftAddLLM(subset[name])
 
+            if quant_config_dict is not None:
+                wbits = quant_config_dict['model.layers.%d.%s' % (i, name)]["bits"]
+            else:
+                wbits = args.wbits
+
             if args.gptq:
                 quant_method[name].quantizer = Quantizer()
                 quant_method[name].quantizer.configure(
-                    args.wbits, perchannel=True, sym=args.sym, mse=False, trits=args.trits
+                    wbits, perchannel=True, sym=args.sym, mse=False, trits=args.trits
                 )
             else:
                 quant_method[name].quantizer = BCQuantizer(subset[name].weight.data.size(),
                                                     groupsize=args.groupsize, 
-                                                    wbits=args.wbits,
+                                                    wbits=wbits,
                                                     rounds=args.bcq_round,
                                                     use_bst=args.use_bst, 
                                                     apot_nums=args.apot_nums)
