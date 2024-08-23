@@ -140,6 +140,10 @@ def parse_args():
 		'--quant_config', type=str, default=None,
 		help='path for mix bit quantization config.'
 	)
+	parser.add_argument(
+		'--recore_error', type=str, default=None,
+		help='whether record the error of the quantization. Used for rank mixbit allocation result'
+	)
 
 	# QUIP method
 	parser.add_argument(

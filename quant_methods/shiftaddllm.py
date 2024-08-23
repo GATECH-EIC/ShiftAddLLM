@@ -218,6 +218,10 @@ class ShiftAddLLM(QuantMethod):
 					Q = Q[:, invperm, : ]
 					Q = Q.reshape(N, K)
 
+		if args.record_error:
+			with open(f"sensitivity/{model_name}-quant_loss.txt", "a+") as f:
+				f.write(f"{layer_name}: {str(torch.sum(Losses).item())}\n")
+
 		if isinstance(self.layer, transformers.Conv1D):
 				Q = Q.t()
 		self.layer.weight.data = Q.reshape(self.layer.weight.shape).to(self.layer.weight.data.dtype)
