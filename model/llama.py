@@ -55,8 +55,23 @@ def llama_sequential(model, dataloader, dev):
         def forward(self, inp, **kwargs):
             inps[cache['i']] = inp
             cache['i'] += 1
-            cache['attention_mask'] = kwargs['attention_mask']
-            cache['position_ids'] = kwargs['position_ids']
+            
+            # Handle attention_mask
+            if 'attention_mask' in kwargs and kwargs['attention_mask'] is not None:
+                cache['attention_mask'] = torch.as_tensor(kwargs['attention_mask']).to(dev)
+            else:
+                cache['attention_mask'] = None
+            
+            # Handle position_ids
+            if 'position_ids' in kwargs and kwargs['position_ids'] is not None:
+                cache['position_ids'] = torch.as_tensor(kwargs['position_ids']).to(dev)
+            else:
+                cache['position_ids'] = None
+            
+            # Move all other kwargs to the device as well
+            for k, v in kwargs.items():
+                if isinstance(v, torch.Tensor):
+                    kwargs[k] = v.to(dev)
             raise ValueError
     layers[0] = Catcher(layers[0])
     for batch in dataloader:
@@ -173,6 +188,12 @@ def llama_sequential(model, dataloader, dev):
 def llama_eval(model, testenc, dev):
     print('Evaluating ...')
 
+    model = model.to(dev)
+
+    for module in model.modules():
+        module.to(dev)
+
+    testenc = testenc.to(dev)
     testenc = testenc.input_ids
     nsamples = testenc.numel() // model.seqlen
 
@@ -196,9 +217,25 @@ def llama_eval(model, testenc, dev):
         def forward(self, inp, **kwargs):
             inps[cache['i']] = inp
             cache['i'] += 1
-            cache['attention_mask'] = kwargs['attention_mask']
-            cache['position_ids'] = kwargs['position_ids']
+            
+            # Handle attention_mask
+            if 'attention_mask' in kwargs and kwargs['attention_mask'] is not None:
+                cache['attention_mask'] = torch.as_tensor(kwargs['attention_mask']).to(dev)
+            else:
+                cache['attention_mask'] = None
+            
+            # Handle position_ids
+            if 'position_ids' in kwargs and kwargs['position_ids'] is not None:
+                cache['position_ids'] = torch.as_tensor(kwargs['position_ids']).to(dev)
+            else:
+                cache['position_ids'] = None
+            
+            # Move all other kwargs to the device as well
+            for k, v in kwargs.items():
+                if isinstance(v, torch.Tensor):
+                    kwargs[k] = v.to(dev)
             raise ValueError
+
     layers[0] = Catcher(layers[0])
     for i in range(nsamples):
         batch = testenc[:, (i * model.seqlen):((i + 1) * model.seqlen)].to(dev)
@@ -263,6 +300,16 @@ def llama_pack3(model, quantizers):
     print('Done.')
     return model
 
+def override_rotary_emb(model):
+    original_forward = model.model.embed_tokens.rotary_emb.forward
+    
+    def new_forward(self, x, seq_len=None):
+        if seq_len is None:
+            seq_len = x.shape[1]
+        return original_forward(x.to(DEV), seq_len)
+    
+    model.model.embed_tokens.rotary_emb.forward = types.MethodType(new_forward, model.model.embed_tokens.rotary_emb)
+
 
 if __name__ == '__main__':
     from datautils import *
@@ -286,7 +333,7 @@ if __name__ == '__main__':
         args.dataset, nsamples=args.nsamples, seed=args.seed, model=args.model, seqlen=model.seqlen
     )
     
-    if args.wbits < 16 and not args.nearest:
+    if args.wbits < 16 and not args.nearest and not args.load:
         tick = time.time()
         if args.bcq:
             print("quantizing with bcq")
@@ -298,7 +345,11 @@ if __name__ == '__main__':
     if args.save:
         #llama_pack3(model, quantizers)
         torch.save(model.state_dict(), args.save)
-        
+    
+    # Call this function before evaluation
+    # print("ensuring model is on the right device")
+    # override_rotary_emb(model)
+
     datasets = ['wikitext2', 'ptb'] 
     if args.new_eval:
         datasets = ['wikitext2', 'ptb-new', 'c4-new']
