@@ -1,4 +1,4 @@
-# from rtn_parameter import RTNParameter
+from tqdm import tqdm
 from quantizers.bcq_quant.bcq_parameter import BCQParameter
 
 
@@ -6,13 +6,13 @@ layers = ["q_proj","k_proj","v_proj","out_proj","fc1","fc2","o_proj","gate_proj"
 
 def quant_model(model, qbits:int = 4, group_size:int = 128, rounds=50):
     parameters  = model.state_dict()
-    for name, module in model.named_children():
+    # Create a tqdm progress bar for the named_children
+    for name, module in tqdm(list(model.named_children()), desc="Quantizing model using bcq"):
         if len(list(module.children())) > 0:
             quant_model(module, qbits, group_size)
 
         if any(x in name for x in layers):
         # if True:
-            print(name)
             original_weight = module.weight.clone().detach()
             # INT4 Quantization -> BCQ
             w_bcq = BCQParameter(original_weight)
