@@ -300,17 +300,6 @@ def llama_pack3(model, quantizers):
     print('Done.')
     return model
 
-def override_rotary_emb(model):
-    original_forward = model.model.embed_tokens.rotary_emb.forward
-    
-    def new_forward(self, x, seq_len=None):
-        if seq_len is None:
-            seq_len = x.shape[1]
-        return original_forward(x.to(DEV), seq_len)
-    
-    model.model.embed_tokens.rotary_emb.forward = types.MethodType(new_forward, model.model.embed_tokens.rotary_emb)
-
-
 if __name__ == '__main__':
     from datautils import *
     args = parse_args()
