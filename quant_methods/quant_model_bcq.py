@@ -22,7 +22,7 @@ def quant_model(model, qbits:int = 4, group_size:int = 128, rounds=50):
     parameters = model.state_dict()
     
     # Iterate through all named children (layers) of the model
-    for name, module in tqdm(list(model.named_children()), desc="Quantizing model"):
+    for name, module in tqdm(list(model.named_children()), desc="Quantizing model using BCQ"):
         # If the module has children, recursively quantize them
         if len(list(module.children())) > 0:
             quant_model(module, qbits, group_size)
