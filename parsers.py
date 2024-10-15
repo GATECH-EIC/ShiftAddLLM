@@ -135,13 +135,19 @@ def parse_args():
 			'--load_temp_storage', type=str, default=None,
 			help='load from temporary quantized weight with low bit under this dir.'
 	)
+	parser.add_argument(
+			'--infer_kernel', action='store_true',default=False,
+			help='whether to inference with cuda kernel.'
+	)
+
+
 	# mix precision
 	parser.add_argument(
 		'--quant_config', type=str, default=None,
 		help='path for mix bit quantization config.'
 	)
 	parser.add_argument(
-		'--recore_error', type=str, default=None,
+		'--record_error', type=str, default=None,
 		help='whether record the error of the quantization. Used for rank mixbit allocation result'
 	)
 

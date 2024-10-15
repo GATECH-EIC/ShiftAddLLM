@@ -154,13 +154,40 @@ To quantize LLMs using our ShiftAddLLM (Lat.) method with block-wise scaling fac
 
 To evaluate quantized LLMs on seven downstream tasks for zero-shot task accuracy evaluation, run:
 
-```python
+```bash
 python3 main.py  <model_name> <calibration_dataset> --task <task_name> --num_fewshot <num_fewshot> 
 ```
  We also provide example scripts for two LLM families.
 - [OPT](zeroShot/script/eval_opt.sh)
 - [Llama2 & Llama3](zeroShot/script/eval_llama.sh)
 
+
+### Speed Test
+In order to measure the latency of generating each token, you first need to install the cuda kernel. ( We developed it based on lut_gemm. Although the naming has not changed, the code has been changed to a new one. )
+```bash
+cd lut_gemm
+python setup_lut.py install
+```
+Then you need to quantize the model in Lat. version and save the packed weights
+```bash
+CUDA_VISIBLE_DEVICES=0 python model/opt.py \
+    facebook/opt-125m \
+    --wbits 3 \
+    --groupsize -1 \
+    --lat \
+    --bcq_round 50 \
+    --temp_storage <packed_weight_dir>
+```
+Then you can use script/infer.sh to benchmark
+```bash
+CUDA_VISIBLE_DEVICES=0 python model/opt.py \
+    facebook/opt-125m \
+    --wbits 3 \
+    --lat \
+    --load_temp_storage <packed_weight_dir> \
+    --infer_kernel \
+    --benchmark 128
+```
 
 ## Citation & Acknowledgement
 

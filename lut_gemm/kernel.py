@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import os
 from tqdm import tqdm
-
+from .quant import LutLinear, make_lut
 # import lutgemm
 
 def pack_binaryWeight(bWeight:torch.Tensor):
@@ -55,7 +55,7 @@ def unpack_weight(bW:torch.Tensor, alpha:torch.Tensor):
     ret_weight = ret_weight.transpose(0, 1)
     return ret_weight
 
-def packed_to_fake_binaryWeight(packed_bweight, n_groups=1):
+def unpack_to_fake_binaryWeight(packed_bweight, n_groups=1):
 
     def binary(x, bits):
         mask = 2**torch.arange(bits).to(x.device, x.dtype)
@@ -74,17 +74,18 @@ def packed_to_fake_binaryWeight(packed_bweight, n_groups=1):
     weight = weight.view(K, n_groups, groupsize, bit)
     return weight
 
+def find_layers(module, layers=[nn.Conv2d, nn.Linear], name=''):
+    if type(module) in layers:
+        return {name: module}
+    res = {}
+    for name1, child in module.named_children():
+        res.update(find_layers(
+            child, layers=layers, name=name + '.' + name1 if name != '' else name1
+        ))
+    return res
+
 def load_shiftaddllm_weight(model, weights_dir, model_name, wbits, is_lat=False):
     print(f"Loading shiftaddllm low-bit weights from {weights_dir}, model_name: {model_name}, wbits: {wbits}")
-    def find_layers(module, layers=[nn.Conv2d, nn.Linear], name=''):
-        if type(module) in layers:
-            return {name: module}
-        res = {}
-        for name1, child in module.named_children():
-            res.update(find_layers(
-                child, layers=layers, name=name + '.' + name1 if name != '' else name1
-            ))
-        return res
 
     assert is_lat, "Packed quantization weight only support lat method now"
     layers = model.model.decoder.layers
@@ -107,28 +108,72 @@ def load_shiftaddllm_weight(model, weights_dir, model_name, wbits, is_lat=False)
             else:
                 print(f"WARNING: no such file {temp_storage_pt}")
 
-if __name__ == "__main__":
-    N, K = 128, 768
-    group_size = 128
-    n_groups = K // group_size
-    wbit = 3
 
-    #g, n, c, b
-    bWeight = torch.randn([N, n_groups, group_size, wbit], device='cuda', dtype=torch.float32)
-    # print(bWeight)
-    bWeight = torch.sign(bWeight)
-    # bWeight = 2.0 * (bWeight > 0) - 1
-    #n, c, b
-    alpha = torch.abs(torch.randn([N, n_groups, wbit], device='cuda', dtype=torch.float32))
+def convert_weight(BinaryWeight, Alpha):
+    import einops
 
-    Q = torch.einsum('nijl,nil->nij', (bWeight, alpha.clone())).flatten(1)
-    binaryWeight = pack_binaryWeight(bWeight.clone())
-    print(binaryWeight.shape)
-    print(binaryWeight.dtype)
-    print(alpha.shape)
+    N = BinaryWeight.size(0)
+    K = BinaryWeight.size(1) * 32
+    wbit = BinaryWeight.size(2)
+    num_groups = Alpha.size(1)
+    group_size = N // num_groups
 
-    recovered_Q = unpack_weight(binaryWeight, alpha)
-    print(recovered_Q.shape)
-    # print(Q.shape)
+    bb = []
+    for ii in range(32):
+        bb.append(BinaryWeight.bitwise_and(1 << ii) != 0)
+    bb = torch.cat(bb, dim=1).float() * 2 - 1
+    bb = einops.rearrange(bb, "k (i c) b -> k (c i) b", i = 32).float()
+    new_bW = einops.rearrange(bb, "k (c g) b -> k b (c g)", g=group_size) #, "g k c b -> k b (c g)")            
+    new_bW = (new_bW == 1) #.contiguous() .view(K, wbit, N).contiguous()
+    new_bW = new_bW.view(K // 32, 32, wbit, N).contiguous()
+    mask = (2**torch.arange(32))[None,:,None,None].to(new_bW.device)
+    compressed_bW = (new_bW * mask).sum(1).to(torch.int32)
+    alpha = Alpha.transpose(1, 2).float()
 
-    print((recovered_Q.cuda() - Q).abs().max())
+    return compressed_bW, alpha
+
+def load_shiftaddllm_weight_with_kernel(model, weights_dir, model_name, wbits, is_lat=False):
+    print(f"Loading shiftaddllm low-bit weights from {weights_dir}, model_name: {model_name}, wbits: {wbits}")
+    print(f"Convert weight and run with CUDA kernel")
+    print(f"WARNING!!! make sure you have kernel installed")
+
+    assert is_lat, "Packed quantization weight only support lat method now"
+    layers = model.model.decoder.layers
+
+    # get the wbit and group size information from the packed weight
+    subset = find_layers(layers[0])
+    name = list(subset.keys())[0]
+    checkpoint = torch.load(os.path.join(weights_dir, f"{model_name}_{0}.{name}_{wbits}bit.pt"))
+    BinaryWeight = checkpoint["bWeight"]
+    alpha = checkpoint["alpha"]
+
+    wbit_weight = BinaryWeight.size(2)
+    group_size = BinaryWeight.size(0) // alpha.size(1)
+    assert wbit_weight == wbits, f"Weight bit mismatch, expect {wbits} bits, but got {wbit_weight} bits"
+
+    # convert
+    make_lut(layers, find_layers(layers), wbit = wbits, group_size = group_size)
+    print(model)
+
+    # load the weight
+    layers = model.model.decoder.layers # layers now are LutLinear
+    for i in tqdm(range(len(layers)), desc="Converting shiftaddllm low-bit weights", leave=True):
+        layer = layers[i]
+        subset = find_layers(layer)
+        for name in subset:
+            layer_name = f"{i}.{name}"
+            temp_storage_pt = os.path.join(weights_dir, f"{model_name}_{layer_name}_{wbits}bit.pt")
+
+            if os.path.exists(temp_storage_pt):
+                # print(f"load from {temp_storage_pt}")
+                checkpoint = torch.load(temp_storage_pt)
+                BinaryWeight = checkpoint["bWeight"]
+                alpha = checkpoint["alpha"]
+                alpha = alpha.repeat_interleave(8, dim=0)
+                compressed_bW, alpha = convert_weight(BinaryWeight, alpha)
+                
+                subset[name].binaryWeight.data = compressed_bW.to(subset[name].binaryWeight.data.dtype)
+                subset[name].alpha.data = subset[name].quantize_to_apot(alpha)
+
+            else:
+                print(f"WARNING: no such file {temp_storage_pt}")

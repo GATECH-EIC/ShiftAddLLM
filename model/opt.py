@@ -15,7 +15,7 @@ from parsers import parse_args
 from quantizers.quant import *
 from quant_methods.quant_model_bcq import quant_model
 from quantizers.bcq_quant.quantizer import BCQuantizer
-from lut_gemm.kernel import load_shiftaddllm_weight
+from lut_gemm.kernel import load_shiftaddllm_weight, load_shiftaddllm_weight_with_kernel
 
 def get_opt(model):
     import torch
@@ -436,10 +436,17 @@ if __name__ == '__main__':
     model.eval()
     print(model)
 
-    if args.load_temp_storage is not None:
+    if args.infer_kernel and args.load_temp_storage is not None:  # load quantized weight and infer with cuda kernel
+        assert args.block_quant, "quantized weight only work for blockwise (i.e lat. method) quantization"
+        load_shiftaddllm_weight_with_kernel(model, args.load_temp_storage, model_name=str(args.model).split("/")[-1],
+                                wbits=args.wbits, is_lat=args.lat)
+
+    elif args.load_temp_storage is not None: # load quantized weight and infer with Fp16
         assert args.block_quant, "temp_storage only work for blockwise (i.e lat. method) quantization"
         load_shiftaddllm_weight(model, args.load_temp_storage, model_name=str(args.model).split("/")[-1],
                                 wbits=args.wbits, is_lat=args.lat)
+
+
 
     dataloader, testloader = get_loaders(
         args.dataset, nsamples=args.nsamples, seed=args.seed, model=args.model, seqlen=model.seqlen
@@ -449,7 +456,7 @@ if __name__ == '__main__':
         tick = time.time()
         if args.bcq:
             print("quantizing with bcq")
-            model = quant_model(model, qbits=args.wbits, group_size=args.groupsize)
+            model = quant_model(model, qbits=args.wbits, group_size=args.groupsize, rounds=args.bcq_round)
         else:
             quantizers = opt_sequential(model, dataloader, DEV)
         print("full quantization time: ",time.time() - tick)
@@ -464,10 +471,8 @@ if __name__ == '__main__':
         input_ids = next(iter(dataloader))[0][:, :args.benchmark]
         print(input_ids.shape)
         benchmark(model, input_ids, check=args.check)
-            
-    if args.benchmark:
         exit()
-
+            
     if args.save:
         torch.save(model.state_dict(), args.save)
         
