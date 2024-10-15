@@ -163,12 +163,12 @@ python3 main.py  <model_name> <calibration_dataset> --task <task_name> --num_few
 
 
 ### Speed Test
-In order to measure the latency of generating each token, you first need to install the cuda kernel. ( We developed it based on lut_gemm. Although the naming has not changed, the code has been changed to a new one. )
+To measure the latency of token generation, start by installing the CUDA kernel. This kernel is based on lut_gemm, but please note that the code has been updated, even though the name remains the same.
 ```bash
 cd lut_gemm
 python setup_lut.py install
 ```
-Then you need to quantize the model in Lat. version and save the packed weights
+Next, quantize the model in the Lat. version and save the packed weights:
 ```bash
 CUDA_VISIBLE_DEVICES=0 python model/opt.py \
     facebook/opt-125m \
@@ -178,7 +178,7 @@ CUDA_VISIBLE_DEVICES=0 python model/opt.py \
     --bcq_round 50 \
     --temp_storage <packed_weight_dir>
 ```
-Then you can use script/infer.sh to benchmark
+Finally, use the [infer.sh](script/infer.sh) script to benchmark the model:
 ```bash
 CUDA_VISIBLE_DEVICES=0 python model/opt.py \
     facebook/opt-125m \
