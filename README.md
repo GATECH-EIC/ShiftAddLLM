@@ -1,3 +1,14 @@
+# Update
+
+This repository is no longer maintained. For the latest work, see
+[ShiftAddQwen](https://github.com/ranery/ShiftAddQwen), which applies the ShiftAdd reparameterization to
+Qwen3.5-9B and runs it in llama.cpp, with released GGUF models on the
+[Hugging Face Hub](https://huggingface.co/hryou1998/ShiftAddQwen-3.5-9B-GGUF). ShiftAddQwen keeps the
+binary-plane weight format but uses a different fitting pipeline (output-aware fit, measured mixed precision,
+scale distillation) and LUT-free kernels; see its
+[method note](https://github.com/ranery/ShiftAddQwen/blob/main/docs/shiftadd_matvec.pdf) for the differences.
+The code here remains available as the reference implementation of the ShiftAddLLM paper (NeurIPS 2024).
+
 <p align="center">
   <img src="assets/logo_torchshiftadd.png"  height=120>
 </p>
